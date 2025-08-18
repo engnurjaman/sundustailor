@@ -1,7 +1,7 @@
 "use client"; // Add this line at the top
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, User, Tally3, Scissors, ShoppingCart, Printer, Search, Edit, Trash2, X, Sun, Moon, Settings, Palette, Pocket, Layers, LogOut, KeyRound, ArrowLeft } from 'lucide-react';
+import { Plus, User, Tally3, Scissors, ShoppingCart, Printer, Search, Edit, Trash2, X, Sun, Moon, Settings, Palette, Pocket, Layers, LogOut, KeyRound } from 'lucide-react';
 
 // --- Type Definitions for TypeScript ---
 interface Measurements {
@@ -115,7 +115,7 @@ const ButtonIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 const ThobeMeasurementDiagram = () => (
     <div className="w-full h-full flex items-center justify-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg min-h-[280px]">
-        <img src="https://i.imgur.com/sOD5m5y.png" alt="Thobe Measurement Diagram" className="w-auto h-full max-h-[300px] object-contain" />
+        <img src="thobe.png" alt="Thobe Measurement Diagram" className="w-auto h-full max-h-[300px] object-contain" />
     </div>
 );
 
@@ -414,12 +414,16 @@ const useLanguage = () => {
         const keys = key.split('.');
         let result: any = translations[language as 'ar' | 'en'];
         for (const k of keys) {
-            result = result[k];
-            if (!result) {
+            if (result && typeof result === 'object' && k in result) {
+                result = result[k];
+            } else {
                 let fallbackResult: any = translations['en'];
                 for (const fk of keys) {
-                    fallbackResult = fallbackResult[fk];
-                    if (!fallbackResult) return key;
+                    if (fallbackResult && typeof fallbackResult === 'object' && fk in fallbackResult) {
+                        fallbackResult = fallbackResult[fk];
+                    } else {
+                        return key;
+                    }
                 }
                 return fallbackResult as string;
             }
@@ -481,7 +485,6 @@ const api = {
 };
 
 // --- DATA CONSTANTS ---
-const ORDER_STATUSES = ['New Order', 'Fabric Cutting', 'Sewing', 'Ready for Pickup', 'Completed', 'Cancelled'];
 const FABRIC_OPTIONS = ['Japanese Synthetic', 'Korean Cotton', 'Indonesian Blend', 'Swiss Cotton'];
 const COLLAR_OPTIONS = ['Standard Saudi', 'Round', 'Stand-up'];
 const CUFF_OPTIONS = ['Simple', 'Cufflinks'];
@@ -654,7 +657,6 @@ const OrderForm = ({ t, order, customers, onSave, onCancel, showToast, onSaveAnd
             customer: { id: null, name: '', phone: '' }
         }
     );
-    const [focusedField, setFocusedField] = useState<string | null>(null);
     const [foundCustomer, setFoundCustomer] = useState<Customer | null>(null);
 
     const handleCustomerDetailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
