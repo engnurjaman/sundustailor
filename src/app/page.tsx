@@ -115,7 +115,7 @@ const ButtonIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 const ThobeMeasurementDiagram = () => (
     <div className="w-full h-full flex items-center justify-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg min-h-[280px]">
-        <img src="thobe.png" alt="Thobe Measurement Diagram" className="w-auto h-full max-h-[300px] object-contain" />
+        <img src="https://i.imgur.com/sOD5m5y.png" alt="Thobe Measurement Diagram" className="w-auto h-full max-h-[300px] object-contain" />
     </div>
 );
 
@@ -534,25 +534,32 @@ const ConfirmationModal = ({ t, onConfirm, onCancel }: { t: (key: string) => str
 );
 
 const CustomerForm = ({ t, customer, onSave, onCancel }: { t: (key: string) => string, customer: Customer | null, onSave: (data: Customer) => void, onCancel: () => void }) => {
+    const defaultMeasurements = { 
+        length: '', shoulders: '', sleeveLength: '', sleeveWidth: '', neck: '', chest: '', waist: '',
+        cuffsLength: '', cuffsWidth: '', chestPlate: '', bottomWidth: ''
+    };
+    const defaultLooseMeasurements = {
+        bodyLoose: '', waistLoose: '', hipLoose: '', chestLoose: '', bicep: '', wrist: ''
+    };
+    
     const [formData, setFormData] = useState<Customer>(customer || {
         id: Date.now(),
         name: '',
         phone: '',
         notes: '',
-        measurements: { standard: {} as Measurements, loose: {} as LooseMeasurements }
+        measurements: { standard: defaultMeasurements, loose: defaultLooseMeasurements }
     });
-    const [focusedField, setFocusedField] = useState<string | null>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleMeasurementChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleMeasurementChange = (type: 'standard' | 'loose', e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            measurements: { ...prev.measurements, standard: { ...prev.measurements.standard, [name]: value } }
+            measurements: { ...prev.measurements, [type]: { ...prev.measurements[type], [name]: value } }
         }));
     };
 
@@ -566,8 +573,8 @@ const CustomerForm = ({ t, customer, onSave, onCancel }: { t: (key: string) => s
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-40 p-4">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-3xl">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-start z-40 p-4 overflow-y-auto">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-4xl my-8">
                 <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">{customer ? t('editCustomer') : t('newCustomer')}</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -585,25 +592,29 @@ const CustomerForm = ({ t, customer, onSave, onCancel }: { t: (key: string) => s
                         <textarea name="notes" value={formData.notes} onChange={handleChange} rows={2} className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
                     </div>
                     <h3 className="text-xl font-semibold mb-3 text-gray-800 dark:text-gray-200">{t('measurements')}</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="md:col-span-1">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        <div className="md:col-span-4 lg:col-span-3">
                              <ThobeMeasurementDiagram />
                         </div>
-                        <div className="md:col-span-2 grid grid-cols-2 gap-4 content-start">
-                           {Object.keys(formData.measurements.standard).map(key => (
-                                <div key={key}>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t(key)}</label>
-                                    <input 
-                                        type="number" 
-                                        name={key} 
-                                        value={(formData.measurements.standard as any)[key]} 
-                                        onChange={handleMeasurementChange}
-                                        onFocus={() => setFocusedField(key)}
-                                        onBlur={() => setFocusedField(null)}
-                                        className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
-                                    />
-                                </div>
-                            ))}
+                        <div className="md:col-span-8 lg:col-span-9">
+                            <h4 className="font-semibold mb-2">{t('measurements')}</h4>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2 content-start">
+                                {Object.keys(formData.measurements.standard).map(key => (
+                                    <div key={key}>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t(key)}</label>
+                                        <input type="number" name={key} value={(formData.measurements.standard as any)[key]} onChange={(e) => handleMeasurementChange('standard', e)} className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                                    </div>
+                                ))}
+                            </div>
+                            <h4 className="font-semibold mt-4 mb-2">{t('looseSizeOptional')}</h4>
+                             <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2 content-start">
+                                {Object.keys(formData.measurements.loose).map(key => (
+                                    <div key={key}>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t(key)}</label>
+                                        <input type="number" name={key} value={(formData.measurements.loose as any)[key]} onChange={(e) => handleMeasurementChange('loose', e)} className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                     <div className="flex justify-end space-x-4 rtl:space-x-reverse mt-6">
