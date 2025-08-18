@@ -115,7 +115,7 @@ const ButtonIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 const ThobeMeasurementDiagram = () => (
     <div className="w-full h-full flex items-center justify-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg min-h-[280px]">
-        <img src="https://i.imgur.com/sOD5m5y.png" alt="Thobe Measurement Diagram" className="w-auto h-full max-h-[300px] object-contain" />
+        <img src="thobe.png" alt="Thobe Measurement Diagram" className="w-auto h-full max-h-[300px] object-contain" />
     </div>
 );
 
