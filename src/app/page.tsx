@@ -115,7 +115,8 @@ const ButtonIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 const ThobeMeasurementDiagram = () => (
     <div className="w-full h-full flex items-center justify-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg min-h-[280px]">
-        <img src="thobe.png" alt="Thobe Measurement Diagram" className="w-auto h-full max-h-[300px] object-contain" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="https://i.imgur.com/sOD5m5y.png" alt="Thobe Measurement Diagram" className="w-auto h-full max-h-[300px] object-contain" />
     </div>
 );
 
@@ -1559,7 +1560,7 @@ export default function App() {
     const renderPage = () => {
         switch (page) {
             case 'dashboard': return <Dashboard t={t} orders={orders} customers={customers} onNewOrderClick={handleNewOrderClick} onEditOrder={handleEditOrder} onDeleteOrder={handleDeleteOrder} onPrintInvoice={handlePrintInvoice} />;
-            case 'orders': return <OrdersPage t={t} orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} showToast={showToast} onEditOrder={handleEditOrder} onDeleteOrder={handleDeleteOrder} onPrintInvoice={handlePrintInvoice} />;
+            case 'orders': return <OrdersPage t={t} orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} showToast={showToast} onNewOrderClick={handleNewOrderClick} onEditOrder={handleEditOrder} onDeleteOrder={handleDeleteOrder} onPrintInvoice={handlePrintInvoice} />;
             case 'customers': return <CustomersPage t={t} customers={customers} setCustomers={setCustomers} showToast={showToast} />;
             case 'settings': return <SettingsPage t={t} showToast={showToast} />;
             default: return <Dashboard t={t} orders={orders} customers={customers} onNewOrderClick={handleNewOrderClick} />;
