@@ -115,7 +115,7 @@ const ButtonIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 const ThobeMeasurementDiagram = () => (
     <div className="w-full h-full flex items-center justify-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg min-h-[280px]">
-        <img src="thobe.png" alt="Thobe Measurement Diagram" className="w-auto h-full max-h-[300px] object-contain" />
+        <img src="https://i.imgur.com/sOD5m5y.png" alt="Thobe Measurement Diagram" className="w-auto h-full max-h-[300px] object-contain" />
     </div>
 );
 
@@ -412,13 +412,13 @@ const useLanguage = () => {
 
     const t = (key: string): string => {
         const keys = key.split('.');
-        let result = translations[language as 'ar' | 'en'];
+        let result: any = translations[language as 'ar' | 'en'];
         for (const k of keys) {
-            result = (result as any)[k];
+            result = result[k];
             if (!result) {
-                let fallbackResult = translations['en'];
+                let fallbackResult: any = translations['en'];
                 for (const fk of keys) {
-                    fallbackResult = (fallbackResult as any)[fk];
+                    fallbackResult = fallbackResult[fk];
                     if (!fallbackResult) return key;
                 }
                 return fallbackResult as string;
