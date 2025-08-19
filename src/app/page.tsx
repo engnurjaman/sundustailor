@@ -1,7 +1,7 @@
 "use client"; // Add this line at the top
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, User, Tally3, Scissors, ShoppingCart, Printer, Search, Edit, Trash2, X, Sun, Moon, Settings, Palette, Pocket, Layers, LogOut, KeyRound } from 'lucide-react';
+import { Plus, User, Tally3, Scissors, ShoppingCart, Printer, Search, Edit, Trash2, X, Sun, Moon, Settings, Palette, Pocket, Layers, LogOut, KeyRound, ArrowLeft } from 'lucide-react';
 
 // --- Type Definitions for TypeScript ---
 interface Measurements {
@@ -28,7 +28,7 @@ interface LooseMeasurements {
 }
 
 interface Customer {
-    id: number;
+    id: number | null;
     name: string;
     phone: string;
     notes: string;
@@ -63,7 +63,8 @@ interface Order {
         extra: number;
         paymentMethod: string;
     };
-    customerId: number;
+    customer: Customer; // <-- Fix here
+    customerId?: number; // Optional, used for lookup
 }
 
 interface SettingsData {
@@ -115,8 +116,7 @@ const ButtonIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 const ThobeMeasurementDiagram = () => (
     <div className="w-full h-full flex items-center justify-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg min-h-[280px]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="https://i.imgur.com/sOD5m5y.png" alt="Thobe Measurement Diagram" className="w-auto h-full max-h-[300px] object-contain" />
+        <img src="thobe.png" alt="Thobe Measurement Diagram" className="w-auto h-full max-h-[300px] object-contain" />
     </div>
 );
 
@@ -415,16 +415,12 @@ const useLanguage = () => {
         const keys = key.split('.');
         let result: any = translations[language as 'ar' | 'en'];
         for (const k of keys) {
-            if (result && typeof result === 'object' && k in result) {
-                result = result[k];
-            } else {
+            result = result[k];
+            if (!result) {
                 let fallbackResult: any = translations['en'];
                 for (const fk of keys) {
-                    if (fallbackResult && typeof fallbackResult === 'object' && fk in fallbackResult) {
-                        fallbackResult = fallbackResult[fk];
-                    } else {
-                        return key;
-                    }
+                    fallbackResult = fallbackResult[fk];
+                    if (!fallbackResult) return key;
                 }
                 return fallbackResult as string;
             }
@@ -486,6 +482,7 @@ const api = {
 };
 
 // --- DATA CONSTANTS ---
+const ORDER_STATUSES = ['New Order', 'Fabric Cutting', 'Sewing', 'Ready for Pickup', 'Completed', 'Cancelled'];
 const FABRIC_OPTIONS = ['Japanese Synthetic', 'Korean Cotton', 'Indonesian Blend', 'Swiss Cotton'];
 const COLLAR_OPTIONS = ['Standard Saudi', 'Round', 'Stand-up'];
 const CUFF_OPTIONS = ['Simple', 'Cufflinks'];
@@ -606,7 +603,7 @@ const CustomerForm = ({ t, customer, onSave, onCancel }: { t: (key: string) => s
                                 {Object.keys(formData.measurements.standard).map(key => (
                                     <div key={key}>
                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t(key)}</label>
-                                        <input type="number" name={key} value={formData.measurements.standard[key as keyof Measurements]} onChange={(e) => handleMeasurementChange('standard', e)} className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                                        <input type="number" name={key} value={(formData.measurements.standard as any)[key]} onChange={(e) => handleMeasurementChange('standard', e)} className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
                                     </div>
                                 ))}
                             </div>
@@ -615,7 +612,7 @@ const CustomerForm = ({ t, customer, onSave, onCancel }: { t: (key: string) => s
                                 {Object.keys(formData.measurements.loose).map(key => (
                                     <div key={key}>
                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t(key)}</label>
-                                        <input type="number" name={key} value={formData.measurements.loose[key as keyof LooseMeasurements]} onChange={(e) => handleMeasurementChange('loose', e)} className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                                        <input type="number" name={key} value={(formData.measurements.loose as any)[key]} onChange={(e) => handleMeasurementChange('loose', e)} className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
                                     </div>
                                 ))}
                             </div>
@@ -640,31 +637,45 @@ const OrderForm = ({ t, order, customers, onSave, onCancel, showToast, onSaveAnd
         bodyLoose: '', waistLoose: '', hipLoose: '', chestLoose: '', bicep: '', wrist: ''
     };
     
-    const [formData, setFormData] = useState(order ? 
-        {...order, customer: customers.find(c => c.id === order.customerId) || {id: null, name: '', phone: ''}} : 
-        {
-            id: Date.now(),
-            orderDate: new Date().toISOString().split('T')[0],
-            deliveryDate: '',
-            status: 'New Order',
-            details: {
-                fabric: 'Japanese Synthetic', color: 'أبيض', collar: 'Standard Saudi',
-                cuffs: 'Simple', pockets: 'Standard Chest', stitching: 'Hidden',
-                buttons: 'عادي', quantity: 1, pricePerThobe: 0, specialInstructions: ''
-            },
-            measurements: defaultMeasurements,
-            looseMeasurements: defaultLooseMeasurements,
-            payment: { deposit: 0, discount: 0, extra: 0, paymentMethod: 'Cash' },
-            customer: { id: null, name: '', phone: '' }
-        }
-    );
+    const [formData, setFormData] = useState<Order>(() => {
+    if (order) {
+        // Only use id, name, phone for customer
+        const foundCustomer = customers.find(c => c.id === order.customerId);
+        return {
+            ...order,
+            customer: foundCustomer
+                ? { id: foundCustomer.id, name: foundCustomer.name, phone: foundCustomer.phone }
+                : { id: null, name: '', phone: '' }
+        };
+    }
+    return {
+        id: Date.now(),
+        orderDate: new Date().toISOString().split('T')[0],
+        deliveryDate: '',
+        status: 'New Order',
+        details: {
+            fabric: 'Japanese Synthetic', color: 'أبيض', collar: 'Standard Saudi',
+            cuffs: 'Simple', pockets: 'Standard Chest', stitching: 'Hidden',
+            buttons: 'عادي', quantity: 1, pricePerThobe: 0, specialInstructions: ''
+        },
+        measurements: defaultMeasurements,
+        looseMeasurements: defaultLooseMeasurements,
+        payment: { deposit: 0, discount: 0, extra: 0, paymentMethod: 'Cash' },
+        customer: { id: null, name: '', phone: '' }
+    };
+});
+    const [focusedField, setFocusedField] = useState<string | null>(null);
     const [foundCustomer, setFoundCustomer] = useState<Customer | null>(null);
 
     const handleCustomerDetailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            customer: { ...prev.customer, [name]: value }
+            customer: {
+                id: typeof prev.customer.id === 'number' ? prev.customer.id : null,
+                name: name === 'name' ? value : prev.customer.name,
+                phone: name === 'phone' ? value : prev.customer.phone
+            }
         }));
     };
     
@@ -683,7 +694,11 @@ const OrderForm = ({ t, order, customers, onSave, onCancel, showToast, onSaveAnd
                 ...prev,
                 measurements: foundCustomer.measurements.standard || defaultMeasurements,
                 looseMeasurements: foundCustomer.measurements.loose || defaultLooseMeasurements,
-                customer: { ...prev.customer, name: foundCustomer.name }
+                customer: {
+                    id: foundCustomer.id,
+                    name: foundCustomer.name,
+                    phone: foundCustomer.phone
+                }
             }));
         }
     };
@@ -1507,7 +1522,7 @@ export default function App() {
 
     const handleSaveOrder = (orderData: any, andPrint = false) => {
         const { customer, ...restOfOrder } = orderData;
-        const customerToSave = customers.find(c => c.phone === customer.phone);
+        let customerToSave = customers.find(c => c.phone === customer.phone);
         let customerIdToSave;
         let customerForInvoice;
 
