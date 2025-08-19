@@ -1,7 +1,7 @@
 "use client"; // Add this line at the top
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, User, Tally3, Scissors, ShoppingCart, Printer, Search, Edit, Trash2, X, Sun, Moon, Settings, Palette, Pocket, Layers, LogOut, KeyRound, ArrowLeft } from 'lucide-react';
+import { Plus, User, Tally3, Scissors, ShoppingCart, Printer, Search, Edit, Trash2, X, Sun, Moon, Settings, Palette, Pocket, Layers, LogOut, KeyRound } from 'lucide-react';
 
 // --- Type Definitions for TypeScript ---
 interface Measurements {
@@ -606,7 +606,7 @@ const CustomerForm = ({ t, customer, onSave, onCancel }: { t: (key: string) => s
                                 {Object.keys(formData.measurements.standard).map(key => (
                                     <div key={key}>
                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t(key)}</label>
-                                        <input type="number" name={key} value={(formData.measurements.standard as any)[key]} onChange={(e) => handleMeasurementChange('standard', e)} className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                                        <input type="number" name={key} value={formData.measurements.standard[key as keyof Measurements]} onChange={(e) => handleMeasurementChange('standard', e)} className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
                                     </div>
                                 ))}
                             </div>
@@ -615,7 +615,7 @@ const CustomerForm = ({ t, customer, onSave, onCancel }: { t: (key: string) => s
                                 {Object.keys(formData.measurements.loose).map(key => (
                                     <div key={key}>
                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t(key)}</label>
-                                        <input type="number" name={key} value={(formData.measurements.loose as any)[key]} onChange={(e) => handleMeasurementChange('loose', e)} className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                                        <input type="number" name={key} value={formData.measurements.loose[key as keyof LooseMeasurements]} onChange={(e) => handleMeasurementChange('loose', e)} className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
                                     </div>
                                 ))}
                             </div>
@@ -1507,7 +1507,7 @@ export default function App() {
 
     const handleSaveOrder = (orderData: any, andPrint = false) => {
         const { customer, ...restOfOrder } = orderData;
-        let customerToSave = customers.find(c => c.phone === customer.phone);
+        const customerToSave = customers.find(c => c.phone === customer.phone);
         let customerIdToSave;
         let customerForInvoice;
 
