@@ -1,7 +1,7 @@
 "use client"; // Add this line at the top
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, User, Tally3, Scissors, ShoppingCart, Printer, Search, Edit, Trash2, X, Sun, Moon, Settings, Palette, Pocket, Layers, LogOut, KeyRound } from 'lucide-react';
+import { Plus, User, Tally3, Scissors, ShoppingCart, Printer, Search, Edit, Trash2, X, Sun, Moon, Settings, Palette, Pocket, Layers, LogOut, KeyRound, ArrowLeft } from 'lucide-react';
 
 // --- Type Definitions for TypeScript ---
 interface Measurements {
@@ -1560,7 +1560,7 @@ export default function App() {
     const renderPage = () => {
         switch (page) {
             case 'dashboard': return <Dashboard t={t} orders={orders} customers={customers} onNewOrderClick={handleNewOrderClick} onEditOrder={handleEditOrder} onDeleteOrder={handleDeleteOrder} onPrintInvoice={handlePrintInvoice} />;
-            case 'orders': return <OrdersPage t={t} orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} showToast={showToast} onNewOrderClick={handleNewOrderClick} onEditOrder={handleEditOrder} onDeleteOrder={handleDeleteOrder} onPrintInvoice={handlePrintInvoice} />;
+            case 'orders': return <OrdersPage t={t} orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} showToast={showToast} onEditOrder={handleEditOrder} onDeleteOrder={handleDeleteOrder} onPrintInvoice={handlePrintInvoice} />;
             case 'customers': return <CustomersPage t={t} customers={customers} setCustomers={setCustomers} showToast={showToast} />;
             case 'settings': return <SettingsPage t={t} showToast={showToast} />;
             default: return <Dashboard t={t} orders={orders} customers={customers} onNewOrderClick={handleNewOrderClick} />;
