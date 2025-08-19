@@ -38,6 +38,7 @@ interface Customer {
     };
 }
 
+// ...existing code...
 interface Order {
     id: number;
     orderDate: string;
@@ -63,8 +64,10 @@ interface Order {
         extra: number;
         paymentMethod: string;
     };
-    customerId: number;
+    customer: Customer | { id: null; name: string; phone: string }; // <-- Fix here
+    customerId?: number; // Optional, used for lookup
 }
+// ...existing code...
 
 interface SettingsData {
     shopName: string;
